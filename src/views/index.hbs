@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+
+.link {
+  stroke: #ccc;
+}
+
+.node text {
+  pointer-events: none;
+  font: 10px sans-serif;
+}
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+</style>
+</head>
+<body>
+<input type="text" id="input" value="10.0.0.2"></input><button type="button" onclick="doQuery()" >Find</button>
+<p id="display">
+</p>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+
+
+var width = 960,
+    height = 500
+
+var svg = d3.select("#display").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var force = d3.layout.force()
+    .gravity(0.05)
+    .distance(100)
+    .charge(-100)
+    .size([width, height]);
+var nodes = new Map();
+var edges = new Map();
+var lastUpdate = 0;
+var ws;
+function doQuery() {
+	var ip = document.getElementById("input").value;
+	//displayGraph('ip/' + ip + '/2?t=' + lastUpdate);
+    ws = new WebSocket("ws://127.0.0.1:9000/foo/bar?q=foobar");
+    ws.onmessage = function(evt) {
+        document.getElementById("display").text = "Msg received from foo: " + evt.data;
+    }
+    
+}
+
+function displayGraph(url) {
+	d3.json(url, function(error, json) {
+        lastUpdate = json.timestamp;
+        json.nodesAdd.forEach(function(n) {
+            nodes.set(n.id, n);
+        });
+        json.nodesDel.forEach(function(n) {
+            nodes.delete(n.id);
+        });
+        json.edgesAdd.forEach(function(e) {
+            edges.set(e.source + "," + e.target, e);
+        })
+        json.edgesDel.forEach(function(e) {
+            edges.delete(e.source + "," + e.target);
+        })
+
+        var edgesArray = [];
+        var nodesArray = [];
+
+        for (var [key, value] of nodes.entries()) {
+            value.index = nodesArray.length;
+            nodesArray.push(value);
+        }
+        for(var [key, value] of edges.entries()) {
+            edgesArray.push({source: nodes.get(value.source).index, target: nodes.get(value.target).index});
+        }
+  force
+      .nodes(nodesArray)
+      .links(edgesArray)
+      .start();
+
+  var link = svg.selectAll(".link")
+      .data(edgesArray)
+    .enter().append("line")
+      .attr("class", "link");
+
+  var node = svg.selectAll(".node")
+      .data(nodesArray)
+    .enter().append("g")
+      .attr("class", "node")
+      .call(force.drag);
+  node.append("circle")
+    .attr("r", 4.5);
+  node.append("text")
+      .attr("dx", 12)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.hostname });
+
+  force.on("tick", function() {
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+  });
+});
+}
+function restart() {
+  node = node.data(nodes);
+
+  node.enter().insert("circle", ".cursor")
+      .attr("class", "node")
+      .attr("r", 5)
+      .on("mousedown", mousedownNode);
+
+  node.exit()
+      .remove();
+
+  link = link.data(links);
+
+  link.enter().insert("line", ".node")
+      .attr("class", "link");
+  link.exit()
+      .remove();
+
+  force.start();
+}
+</script>
+</body>
