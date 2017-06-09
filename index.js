@@ -1,5 +1,6 @@
-const port = process.env.PORT || 4000;
-const wsPort = process.env.PORT || 9000;
+const webpagePort = process.env.PORT || 4000;
+const broadcasterPort = process.env.BROAD_PORT || 9000;
+const updaterPort = process.env.UPDATE_PORT || 9001;
 const env = process.env.NODE_ENV || 'development';
 const src = env === 'production' ? './build/app' : './src/app';
 
@@ -10,5 +11,6 @@ if (env === 'development') {
 }
 
 const apps = require(src).default;
-apps.wsApp.listen(wsPort);
-apps.app.listen(port);
+apps.broadcaster.listen(broadcasterPort);
+apps.webpage.listen(webpagePort);
+apps.updater.listen(updaterPort);

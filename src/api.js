@@ -18,33 +18,40 @@ const api = KoaRouter();
 //   await next();
 // }
 
+// route.all('/ip', function(ctx) {
+//   ctx.websocket.on('message', function(message) {
+//     console.log("message");
+//     ctx.websocket.send(message);
+//   });
+// });
+
 api.get('/ip/:addr/:depth',
   async (ctx, next) => {
     const { addr, depth } = ctx.params;
     var key = "addr:" + addr + "," + depth;
     ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
     ctx.websocket.data = ctx.session.data;
-    const promise = ctx
+    const data = await ctx
       .state
       .neo4j.getByIp(ctx.session.data, addr, depth);
-    promise.then(function(result) {
-      this.ctx.body = result;
-    }.bind({ctx: ctx}));
+    ctx.websocket.send(JSON.stringify(data));
   }
 );
   
 api.get('/hostname/:name/:depth',
   async (ctx, next) => {
-    const { name, depth } = ctx.params;
-    var key = "name:" + name + "," + depth;
-    ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
-    ctx.websocket.data = ctx.session.data;
-    const promise = ctx
-      .state
-      .neo4j.getByHostname(ctx.session.data, name, depth);
-    promise.then(function(result) {
-      this.ctx.body = result;
-    }.bind({ctx: ctx}));
+    ctx.websocket.on('message', function(message) {
+      const { name, depth } = ctx.params;
+      var key = "name:" + name + "," + depth;
+      ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
+      ctx.websocket.data = ctx.session.data;
+      const promise = ctx
+        .state
+        .neo4j.getByHostname(ctx.session.data, name, depth);
+      promise.then(function(result) {
+        this.ctx.body = result;
+      }.bind({ctx: ctx}));
+    });
   }
 );
 

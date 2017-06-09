@@ -1,4 +1,5 @@
 import KoaRouter from 'koa-router';
+import WebSocket from 'ws';
 
 const api = KoaRouter();
 
@@ -18,44 +19,60 @@ const api = KoaRouter();
 //   await next();
 // }
 
-api.del('/delete_edge/:start/:end',
+api.del('/delete_edge',
   async (ctx, next) => {
-    const {start, end} = ctx.params;
   }
 );
 
-api.post('/add_edge/:start/:end',
+api.post('/add_edge',
   async (ctx, next) => {
-    const {start, end} = ctx.params;
+    ctx.websocket.on('message', async function(message) {
+      var json = JSON.parse(message);
+      var node = await ctx
+        .state
+        .neo4j.addEdge(json.source, json.target);
+    });
   }
 );
 
-api.del('/delete_node/:nodeid',
+api.del('/delete_node',
   async (ctx, next) => {
-    const nodeid = ctx.params;
+      ctx.state.server.foreach(function(client) {
+        if(client.readyState === WebSocket.OPEN) {
+
+        }
+      });
   }
 );
 
-api.post('/add_node/:addr/:hostname',
+api.get('/add_node',
   async (ctx, next) => {
-    const {addr, hostname} = ctx.params;
-  }
-);
-
-api.post('/hostname/:name/:depth',
-  async (ctx, next) => {
-    const { name, depth } = ctx.params;
-    var key = "name:" + name + "," + depth;
-    ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
-    ctx.websocket.data = ctx.session.data;
-    const promise = ctx
-      .state
-      .neo4j.getByHostname(ctx.session.data, name, depth);
-    promise.then(function(result) {
-      this.ctx.body = result;
+    console.log("add_node");
+    ctx.websocket.on('message', async function(message) {
+      console.log(message);
+      var json = JSON.parse(message);
+      var node = await this.ctx
+        .state
+        .neo4j.addNode(json.hostname, json.ip);
+      this.ctx.websocket.send(JSON.stringify(node));
     }.bind({ctx: ctx}));
   }
 );
+
+// api.post('/hostname/:name/:depth',
+//   async (ctx, next) => {
+//     const { name, depth } = ctx.params;
+//     var key = "name:" + name + "," + depth;
+//     ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
+//     ctx.websocket.data = ctx.session.data;
+//     const promise = ctx
+//       .state
+//       .neo4j.getByHostname(ctx.session.data, name, depth);
+//     promise.then(function(result) {
+//       this.ctx.body = result;
+//     }.bind({ctx: ctx}));
+//   }
+// );
 
 // api.post('/:collection',
 //   validateKey,

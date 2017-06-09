@@ -8,6 +8,8 @@ import hbs from 'koa-hbs';
 import session from 'koa-session';
 import websockify from 'koa-websocket';
 import url from 'url';
+import updater from './updater'
+
 var sessions = new Map();
 var maximumAge = 86400000;
 const CONFIG = {
@@ -46,12 +48,12 @@ async function destroySession(key) {
 const broadcaster = websockify(new Koa());
 
 broadcaster.ws.use(session(CONFIG, broadcaster));
-broadcaster.ws.use(cors())
-    .use(async (ctx, next) => {
+broadcaster.ws.use(async (ctx, next) => {
         ctx.state.neo4j = config.neo4j;
+        ctx.state.server = broadcaster.server;
         await next();
     })
-    .use(bodyParser())
+    /*.use(bodyParser())*/
     .use(api.routes())
     .use(api.allowedMethods());
 
@@ -65,12 +67,10 @@ webpage.use(hbs.middleware({
     .use(www.allowedMethods());
 
 const updaterApp = websockify(new Koa());
-updaterApp.ws.use(cors())
-    .use(async (ctx, next) => {
+updaterApp.ws.use(async (ctx, next) => {
         ctx.state.neo4j = config.neo4j;
         await next();
     })
-    .use(bodyParser())
     .use(updater.routes())
     .use(updater.allowedMethods());
 

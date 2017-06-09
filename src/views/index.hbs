@@ -45,17 +45,24 @@ var lastUpdate = 0;
 var ws;
 function doQuery() {
 	var ip = document.getElementById("input").value;
-	//displayGraph('ip/' + ip + '/2?t=' + lastUpdate);
-    ws = new WebSocket("ws://127.0.0.1:9000/foo/bar?q=foobar");
-    ws.onmessage = function(evt) {
-        document.getElementById("display").text = "Msg received from foo: " + evt.data;
-    }
+	displayGraph('ws://127.0.0.1:9000/ip/' + ip + '/2');
+    //ws.onmessage = function(evt) {
+    //    document.getElementById("display").text = "Msg received from foo: " + evt.data;
+    //}
     
 }
 
 function displayGraph(url) {
-	d3.json(url, function(error, json) {
-        lastUpdate = json.timestamp;
+    ws = new WebSocket(url);
+    ws.addEventListener('open', function (event) {
+        //ws.send('Hello Server!');
+        console.log("Sent message");
+    });
+    ws.onmessage = function(evt) {
+        console.log(evt.data);
+        if(!evt.data)
+            return;
+        var json = JSON.parse(evt.data);
         json.nodesAdd.forEach(function(n) {
             nodes.set(n.id, n);
         });
@@ -79,37 +86,37 @@ function displayGraph(url) {
         for(var [key, value] of edges.entries()) {
             edgesArray.push({source: nodes.get(value.source).index, target: nodes.get(value.target).index});
         }
-  force
-      .nodes(nodesArray)
-      .links(edgesArray)
-      .start();
+        force
+            .nodes(nodesArray)
+            .links(edgesArray)
+            .start();
 
-  var link = svg.selectAll(".link")
-      .data(edgesArray)
-    .enter().append("line")
-      .attr("class", "link");
+        var link = svg.selectAll(".link")
+            .data(edgesArray)
+            .enter().append("line")
+            .attr("class", "link");
 
-  var node = svg.selectAll(".node")
-      .data(nodesArray)
-    .enter().append("g")
-      .attr("class", "node")
-      .call(force.drag);
-  node.append("circle")
-    .attr("r", 4.5);
-  node.append("text")
-      .attr("dx", 12)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.hostname });
+        var node = svg.selectAll(".node")
+            .data(nodesArray)
+            .enter().append("g")
+            .attr("class", "node")
+            .call(force.drag);
+        node.append("circle")
+            .attr("r", 4.5);
+        node.append("text")
+            .attr("dx", 12)
+            .attr("dy", ".35em")
+            .text(function(d) { return d.hostname });
 
-  force.on("tick", function() {
-    link.attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
+        force.on("tick", function() {
+            link.attr("x1", function(d) { return d.source.x; })
+                .attr("y1", function(d) { return d.source.y; })
+                .attr("x2", function(d) { return d.target.x; })
+                .attr("y2", function(d) { return d.target.y; });
 
-    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-  });
-});
+            node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        });
+    }
 }
 function restart() {
   node = node.data(nodes);
