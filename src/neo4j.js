@@ -27,6 +27,13 @@ class Neo4j {
         });
     }
 
+    async delNode(hostname) {
+        return this.session.run(
+            "MATCH p = (n:Host {hostname: $hostname}) DETACH DELETE n",
+            {hostname: hostname}
+        );
+    }
+
     async addEdge(source, target) {
         console.log("0. source: " + source + " => " + " target: " + target);
         var promise = this.session.run(
@@ -126,7 +133,7 @@ class Neo4j {
         for (var [key, value] of edgesNew.entries()) {
             edges.set(key,value);
         }
-        console.log("5. Here");
+        console.log("5. Here nAdd: " + nodesAdd.length + ", nDel: " + nodesDel.length + ", eAdd: " + edgesAdd.length + ", eDel: ", edgesDel.length);
         return {nodesAdd: nodesAdd, nodesDel: nodesDel, edgesAdd: edgesAdd, edgesDel: edgesDel};
     }
 }
