@@ -2,38 +2,22 @@ import KoaRouter from 'koa-router';
 
 const api = KoaRouter();
 
-// const validateCollection = async (ctx, next) => {
-//   const { collection } = ctx.params;
-//   if (!(collection in ctx.state.collections)) {
-//     return ctx.throw(404);
-//   }
-//   await next();
-// }
-
-// const validateKey = async (ctx, next) => {
-//   const { authorization } = ctx.request.headers;
-//   if (authorization !== ctx.state.authorizationHeader) {
-//     return ctx.throw(401);
-//   }
-//   await next();
-// }
-
-// route.all('/ip', function(ctx) {
-//   ctx.websocket.on('message', function(message) {
-//     console.log("message");
-//     ctx.websocket.send(message);
-//   });
-// });
-
 api.get('/ip/:addr/:depth',
   async (ctx, next) => {
+    console.log("0. received query");
     const { addr, depth } = ctx.params;
+    console.log("1. received query: " + addr + ", depth: " + depth);
     var key = "addr:" + addr + "," + depth;
     ctx.session.data = {key: key, nodes: new Map(), edges: new Map()};
-    ctx.websocket.data = ctx.session.data;
+    ctx.websocket.query = {ip: addr, hostname: null, depth: depth};
+    ctx.websocket.session = ctx.session;
+    console.log("client count: " + ctx.state.server.clients.length);
+    console.log("2. received query: " + addr + ", depth: " + depth);
     const data = await ctx
       .state
       .neo4j.getByIp(ctx.session.data, addr, depth);
+    console.log("6. Here");
+    console.log(data);
     ctx.websocket.send(JSON.stringify(data));
   }
 );

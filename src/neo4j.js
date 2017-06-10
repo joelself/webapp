@@ -18,41 +18,44 @@ class Neo4j {
             "CREATE (a:Host {hostname:$hostname, ip: $ip}) RETURN {id: ID(a), hostname: a.hostname, ip: a.ip}",
             {hostname: hostname, ip: ip}
         );
-        var result = promise.then(result => {
+        return promise.then(result => {
             const singleRecord = result.records[0];
             const node = singleRecord.get(0);
             console.log("hostname: " + node.hostname + ", ip: " + node.ip + ", id: " + node.id.low);
 
             return {hostname: node.hostname, ip: node.ip, id: node.id.low};
         });
-        return result;
     }
 
     async addEdge(source, target) {
+        console.log("0. source: " + source + " => " + " target: " + target);
         var promise = this.session.run(
             "MATCH (n:Host) WHERE ID(n) = $source MATCH (m:Host) WHERE ID(m) = $target CREATE (n)-[c:CONNECTION]->(m)",
             {source: neo4j.int(source), target: neo4j.int(target)}
         );
-        promise.then(result => {
-            console.log("source: " + source + " => " + " target: " + target);
+        return promise.then(result => {
+            console.log("1. source: " + source + " => " + " target: " + target);
         });
-        return result;
     }
 
     async getByIp(data, addr, depth) {
-        const promise = this.session.run(
-            "MATCH p = (n:Host {ip: $addr})-[c:CONNECTION*1..' + depth + ']-(m) RETURN p",
+        var promise = this.session.run(
+            "MATCH p = (n:Host {ip: $addr})-[c:CONNECTION*1.." + depth + "]-(m) RETURN p",
             {addr: addr}
         );
         this.data = data;
+        console.log("1. Here");
         return promise.then(function(result) {
+            console.log("2. Here");
             return this.processResult(result, this.data.nodes, this.data.edges);
-        }.bind(this));
+        }.bind(this), function(reason) {
+            console.log(reason);
+        });
     }
     
     async getByHostname(data, name, depth) {
-        const promise = this.session.run(
-            "MATCH p = (n:Host {hostname: $name})-[c:CONNECTION*1..' + depth + '}]-(m) RETURN p",
+        var promise = this.session.run(
+            "MATCH p = (n:Host {hostname: $name})-[c:CONNECTION*1.." + depth + "}]-(m) RETURN p",
             {name: name}
         );
         this.data = data;
@@ -111,14 +114,19 @@ class Neo4j {
                 edgesDel.push(value);
             }
         }
+        console.log("4. Here");
         nodes.clear();
+        console.log("4.1. Here");
         edges.clear();
+        console.log("4.2. Here");
         for (var [key, value] of nodesNew.entries()) {
-            nodes.set(key, val);
+            nodes.set(key, value);
         }
+        console.log("4.3. Here");
         for (var [key, value] of edgesNew.entries()) {
-            edges.set(key,val);
+            edges.set(key,value);
         }
+        console.log("5. Here");
         return {nodesAdd: nodesAdd, nodesDel: nodesDel, edgesAdd: edgesAdd, edgesDel: edgesDel};
     }
 }

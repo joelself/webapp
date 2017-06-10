@@ -3,43 +3,45 @@
 <meta charset="utf-8">
 <style>
 
-.link {
+line {
   stroke: #ccc;
+  stroke-width: 1;
 }
 
-.node text {
-  pointer-events: none;
-  font: 10px sans-serif;
-}
+
 
 </style>
 </head>
 <body>
 <input type="text" id="input" value="10.0.0.2"></input><button type="button" onclick="doQuery()" >Find</button>
-<p id="display"></p>
+<p id="display"><svg width="600" height="600"></svg></p>
 <p id="dbgarea">
 </p>
 <script src="http://d3js.org/d3.v4.js"></script>
 <script>
 
-var width = 600,
-    height = 500;
-const forceX = d3.forceX(width / 2).strength(0.015)
-const forceY = d3.forceY(height / 2).strength(0.015)
 
-var svg = d3.select("#display").append("svg")
-    .attr("width", width)
-    .attr("height", height);
-var force = d3.forceSimulation([])
-    .force("charge", d3.forceManyBody().strength(-1000))
-    .force("link", d3.forceLink([]).id(function(d) { return d.id; }).distance(100))
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height"),
+    color = d3.scaleOrdinal(d3.schemeCategory10);
+
+var edgesArray = [];
+var nodesArray = [];
+
+var simulation = d3.forceSimulation(nodesArray)
+    .force("charge", d3.forceManyBody().strength(-500))
+    .force("link", d3.forceLink(edgesArray).distance(150).strength(0.4).id(function(d) { return d.id; }))
     .force("x", d3.forceX())
     .force("y", d3.forceY())
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .alphaTarget(1);
-
-  var node = svg.selectAll(".node");
-  var link = svg.selectAll(".link");
+    .alphaTarget(1)
+    .on("tick", ticked);
+var g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"),
+    link = g.append("g").attr("stroke", "#000").attr("stroke-width", 1.5).selectAll(".link"),
+    node = g.append("g").attr("stroke", "#000").attr("stroke-width", 1.5).attr("class", "nodes").selectAll("g");
+    text = g.append("g").attr("class", "labels").selectAll("g");
+var circle;
+restart([], [], []);
 var nodes = new Map();
 var edges = new Map();
 var lastUpdate = 0;
@@ -53,10 +55,6 @@ function doQuery() {
     
 }
 var init = false;
-var node;
-var link;
-var edgesArray = [];
-var nodesArray = [];
 function displayGraph(url) {
     ws = new WebSocket(url);
     ws.addEventListener('open', function (event) {
@@ -64,6 +62,7 @@ function displayGraph(url) {
         console.log("Sent message");
     });
     ws.onmessage = function(evt) {
+        var newNodes = [];
         console.log(evt.data);
         console.log("got message");
         if(!evt.data)
@@ -80,6 +79,7 @@ function displayGraph(url) {
             dbg.innerHTML = dbg.innerHTML + "<br>Added node: " + n.hostname + ", id: " + n.id;
             dbg.innerHTML = dbg.innerHTML + "<br>node: " + n.hostname + ", id: " + n.id + ", index: " + n.index;
             nodesArray.push(n);
+            newNodes.push(n);
         });
         json.nodesDel.forEach(function(n) {
             nodesArray.splice(nodes.get(n.id).index, 1);
@@ -100,48 +100,53 @@ function displayGraph(url) {
             dbg.innerHTML = dbg.innerHTML + "<br>Deleted edge source: " + e.source + ", target: " + e.target;
             edges.delete(e.source + "," + e.target);
         })
-        console.log(nodesArray);
+        console.log(newNodes);
         console.log(edgesArray);
-        restart(nodesArray, edgesArray);
+        restart(nodesArray, newNodes, edgesArray);
     }
 }
-function restart(nodeArray, edgesArray) {
-  
+function restart(nodeArray, newNodes, edgeArray) {
+  // Apply the general update pattern to the nodes.
+
   node = node.data(nodeArray, function(d) { return d.id;});
-  
+
   node.exit().remove();
-  node = node.enter().append("g")
-      .attr("class", "node")
-      .call(d3.drag()
+  prevNode = node;
+  node = node.enter().append("g");
+  node.append("circle").attr("fill", function(d) { return color(d.id); }).attr("r", 8).call(d3.drag()
           .on("start", dragstarted)
           .on("drag", dragged)
-          .on("end", dragended))
-      node.append("circle")
-            .attr("r", 4.5);
-
-  link = link.data(edgesArray);
-  link.exit().remove();
-  link = link.enter().append("line")
-      .attr("class", "link");
-
-
+          .on("end", dragended));
   node.append("text")
-      .attr("dx", 12)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.hostname });
+    .attr("dx", 12)
+    .attr("y", ".35em")
+    .style("font-family", "sans-serif")
+    .style("font-size", "0.7em")
+    .text(function(d) { return d.hostname + " - " + d.ip; });
+  //node = node.selectAll("g");
+  node = node.merge(prevNode);
+  // Apply the general update pattern to the links.
+  link = link.data(edgeArray, function(d) { return d.source.id + "-" + d.target.id; });
+  link.exit().remove();
+  link = link.enter().append("line").merge(link);
 
-  force.nodes(nodesArray)
-    .on("tick", function() {
-        link.attr("x1", function(d) { return d.source.x; })
-            .attr("y1", function(d) { return d.source.y; })
-            .attr("x2", function(d) { return d.target.x; })
-            .attr("y2", function(d) { return d.target.y; });
+  // Update and restart the simulation.
+  simulation.nodes(nodeArray);
+  simulation.force("link").links(edgeArray);
+  simulation.alpha(1).restart();
+}
+function ticked() {
+  //text.attr("x", function(d) { return d.x; })
+  //    .attr("y", function(d) { return d.y; });
+  //circle.attr("cx", function(d) { return d.x; })
+  //    .attr("cy", function(d) { return d.y; });
 
-        node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-    });
-    force.force("link")
-      .links(edgesArray);
-    force.alpha(1).restart();
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
 }
 function dragstarted(d) {
   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
