@@ -19,7 +19,7 @@ function startup() {
     apps.webpage.listen(webpagePort);
     apps.updater.listen(updaterPort);
 
-    proc = spawn("node", ["../neo4j-pop/index.js"]);
+    proc = spawn("node", ["neo4j-pop/index.js"]);
     proc.stdout.on('data', function (data) {
         var str = data.toString()
         var lines = str.split(/(\r?\n)/g);

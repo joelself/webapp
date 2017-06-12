@@ -1,5 +1,5 @@
 const neo4j = require('neo4j-driver').v1;
-const uri = "bolt://127.0.0.1:7687";
+const uri = "bolt://localhost:7687";
 const user = "neo4j";
 const password = "password";
 class Neo4j {

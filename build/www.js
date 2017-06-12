@@ -20,11 +20,10 @@ www.get('/', function () {
             while (1) {
                 switch (_context.prev = _context.next) {
                     case 0:
-                        console.log(ctx);
-                        _context.next = 3;
+                        _context.next = 2;
                         return ctx.render('index');
 
-                    case 3:
+                    case 2:
                     case 'end':
                         return _context.stop();
                 }
@@ -35,15 +34,6 @@ www.get('/', function () {
     return function (_x, _x2) {
         return _ref.apply(this, arguments);
     };
-}()
-//   async (ctx, next) => {
-//     const { addr, depth } = ctx.params;
-//     const data = await ctx
-//       .state
-//       .neo4j.getByIp(addr, depth);
-
-//     ctx.body = data;
-//   }
-);
+}());
 
 exports.default = www;

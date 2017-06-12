@@ -1,0 +1,15 @@
+neo4j:
+  image: neo4j
+  ports:
+    - "7474:7474"
+    - "7687:7687"
+  environment:
+    - NEO4J_AUTH=none
+node:
+  build: ./
+  links:
+    - neo4j
+  ports:
+    - "8000:8000"
+    - "9000:9000"
+    - "9001:9001"

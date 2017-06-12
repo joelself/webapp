@@ -1,86 +1,86 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var getSession = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(key) {
-    var session;
-    return regeneratorRuntime.wrap(function _callee$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            if (!sessions.has(key)) {
-              sessions.set(key, { session: { nodes: new Map(), edges: new Map() }, maxAge: maximumAge });
+    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(key) {
+        var session;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+            while (1) {
+                switch (_context.prev = _context.next) {
+                    case 0:
+                        if (!sessions.has(key)) {
+                            sessions.set(key, { session: { nodes: new Map(), edges: new Map() }, maxAge: maximumAge });
+                        }
+                        session = sessions.get(key).session;
+                        return _context.abrupt('return', new Promise(function (resolve) {
+                            resolve(session);
+                        }));
+
+                    case 3:
+                    case 'end':
+                        return _context.stop();
+                }
             }
-            session = sessions.get(key).session;
-            return _context.abrupt('return', new Promise(function (resolve) {
-              resolve(session);
-            }));
+        }, _callee, this);
+    }));
 
-          case 3:
-          case 'end':
-            return _context.stop();
-        }
-      }
-    }, _callee, this);
-  }));
-
-  return function getSession(_x) {
-    return _ref.apply(this, arguments);
-  };
+    return function getSession(_x) {
+        return _ref.apply(this, arguments);
+    };
 }();
 
 var setSession = function () {
-  var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key, sess, maxAge) {
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            sessions.set(key, { session: sess, maxAge: maxAge });
-            setTimeout(function () {
-              sessions.delete(key);
-            }, maxAge);
-            return _context2.abrupt('return', new Promise(function (resolve) {
-              resolve();
-            }));
+    var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(key, sess, maxAge) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+            while (1) {
+                switch (_context2.prev = _context2.next) {
+                    case 0:
+                        sessions.set(key, { session: sess, maxAge: maxAge });
+                        setTimeout(function () {
+                            sessions.delete(key);
+                        }, maxAge);
+                        return _context2.abrupt('return', new Promise(function (resolve) {
+                            resolve();
+                        }));
 
-          case 3:
-          case 'end':
-            return _context2.stop();
-        }
-      }
-    }, _callee2, this);
-  }));
+                    case 3:
+                    case 'end':
+                        return _context2.stop();
+                }
+            }
+        }, _callee2, this);
+    }));
 
-  return function setSession(_x2, _x3, _x4) {
-    return _ref2.apply(this, arguments);
-  };
+    return function setSession(_x2, _x3, _x4) {
+        return _ref2.apply(this, arguments);
+    };
 }();
 
 var destroySession = function () {
-  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(key) {
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
-      while (1) {
-        switch (_context3.prev = _context3.next) {
-          case 0:
-            sessions.delete(key);
-            return _context3.abrupt('return', new Promise(function (resolve) {
-              resolve();
-            }));
+    var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(key) {
+        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+            while (1) {
+                switch (_context3.prev = _context3.next) {
+                    case 0:
+                        sessions.delete(key);
+                        return _context3.abrupt('return', new Promise(function (resolve) {
+                            resolve();
+                        }));
 
-          case 2:
-          case 'end':
-            return _context3.stop();
-        }
-      }
-    }, _callee3, this);
-  }));
+                    case 2:
+                    case 'end':
+                        return _context3.stop();
+                }
+            }
+        }, _callee3, this);
+    }));
 
-  return function destroySession(_x5) {
-    return _ref3.apply(this, arguments);
-  };
+    return function destroySession(_x5) {
+        return _ref3.apply(this, arguments);
+    };
 }();
 
 var _koa = require('koa');
@@ -142,20 +142,20 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 var sessions = new Map();
 var maximumAge = 86400000;
 var CONFIG = {
-  key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
-  /** (number || 'session') maxAge in ms (default is 1 days) */
-  /** 'session' will result in a cookie that expires when session/browser is closed */
-  /** Warning: If a session cookie is stolen, this cookie will never expire */
-  store: { get: getSession, set: setSession, destroy: destroySession },
-  maxAge: maximumAge,
-  overwrite: true, /** (boolean) can overwrite or not (default true) */
-  httpOnly: true, /** (boolean) httpOnly or not (default true) */
-  signed: false /** (boolean) signed or not (default true) */
+    key: 'koa:sess', /** (string) cookie key (default is koa:sess) */
+    /** (number || 'session') maxAge in ms (default is 1 days) */
+    /** 'session' will result in a cookie that expires when session/browser is closed */
+    /** Warning: If a session cookie is stolen, this cookie will never expire */
+    store: { get: getSession, set: setSession, destroy: destroySession },
+    maxAge: maximumAge,
+    overwrite: true, /** (boolean) can overwrite or not (default true) */
+    httpOnly: true, /** (boolean) httpOnly or not (default true) */
+    signed: false /** (boolean) signed or not (default true) */
 };
 var document = swagger.loadDocumentSync("./swagger.yaml");
 
 if (!swagger.validateDocument(document)) {
-  throw Error("./swagger.yaml does not conform to the Swagger 2.0 schema");
+    throw Error("./swagger.yaml does not conform to the Swagger 2.0 schema");
 }
 
 
@@ -163,75 +163,58 @@ var broadcaster = (0, _koaWebsocket2.default)(new _koa2.default(), { clientTrack
 
 broadcaster.ws.use((0, _koaSession2.default)(CONFIG, broadcaster));
 broadcaster.ws.use(function () {
-  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ctx, next) {
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            ctx.state.neo4j = _config2.default.neo4j;
-            ctx.state.server = broadcaster.ws.server;
-            _context4.next = 4;
-            return next();
+    var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(ctx, next) {
+        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+            while (1) {
+                switch (_context4.prev = _context4.next) {
+                    case 0:
+                        ctx.state.neo4j = _config2.default.neo4j;
+                        ctx.state.server = broadcaster.ws.server;
+                        _context4.next = 4;
+                        return next();
 
-          case 4:
-          case 'end':
-            return _context4.stop();
-        }
-      }
-    }, _callee4, undefined);
-  }));
+                    case 4:
+                    case 'end':
+                        return _context4.stop();
+                }
+            }
+        }, _callee4, undefined);
+    }));
 
-  return function (_x6, _x7) {
-    return _ref4.apply(this, arguments);
-  };
+    return function (_x6, _x7) {
+        return _ref4.apply(this, arguments);
+    };
 }()).use((0, _koaBodyparser2.default)()).use(_api2.default.routes()).use(_api2.default.allowedMethods()).use((0, _swagger2Koa.validate)(document));
 
 var webpage = new _koa2.default();
 
 webpage.use(_koaHbs2.default.middleware({
-  viewPath: __dirname + '/views'
+    viewPath: __dirname + '/views'
 })).use((0, _koaBodyparser2.default)()).use(_www2.default.routes()).use(_www2.default.allowedMethods()).use((0, _swagger2Koa.ui)(document, "/swagger"));
 
 var updaterApp = (0, _koaWebsocket2.default)(new _koa2.default());
 updaterApp.ws.use(function () {
-  var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(ctx, next) {
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
-      while (1) {
-        switch (_context5.prev = _context5.next) {
-          case 0:
-            ctx.state.neo4j = _config2.default.neo4j;
-            ctx.state.server = broadcaster.ws.server;
-            _context5.next = 4;
-            return next();
+    var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(ctx, next) {
+        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+            while (1) {
+                switch (_context5.prev = _context5.next) {
+                    case 0:
+                        ctx.state.neo4j = _config2.default.neo4j;
+                        ctx.state.server = broadcaster.ws.server;
+                        _context5.next = 4;
+                        return next();
 
-          case 4:
-          case 'end':
-            return _context5.stop();
-        }
-      }
-    }, _callee5, undefined);
-  }));
+                    case 4:
+                    case 'end':
+                        return _context5.stop();
+                }
+            }
+        }, _callee5, undefined);
+    }));
 
-  return function (_x8, _x9) {
-    return _ref5.apply(this, arguments);
-  };
+    return function (_x8, _x9) {
+        return _ref5.apply(this, arguments);
+    };
 }()).use(_updater2.default.routes()).use(_updater2.default.allowedMethods());
-
-// const wss = new WebSocket.Server({ port: 9000 });
-// wss.on('connection', function connection(ws, req) {
-//   const location = url.parse(req.url, true);
-//   console.log(location);
-//   ws.query = location.query.q;
-
-//   console.log(ws);
-//   // You might use location.query.access_token to authenticate or share sessions
-//   // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-
-//   ws.on('message', function incoming(message) {
-//     console.log('received: %s', message);
-//   });
-
-//   ws.send('something');
-// });
 
 exports.default = { webpage: webpage, broadcaster: broadcaster, updater: updaterApp };

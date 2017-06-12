@@ -13,7 +13,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var neo4j = require('neo4j-driver').v1;
-var uri = "bolt://127.0.0.1:7687";
+var uri = "bolt://localhost:7687";
 var user = "neo4j";
 var password = "password";
 
@@ -42,7 +42,6 @@ var Neo4j = function () {
                                 return _context.abrupt("return", promise.then(function (result) {
                                     var singleRecord = result.records[0];
                                     var node = singleRecord.get(0);
-                                    console.log("hostname: " + node.hostname + ", ip: " + node.ip + ", id: " + node.id.low);
 
                                     return { hostname: node.hostname, ip: node.ip, id: node.id.low };
                                 }));
@@ -94,13 +93,10 @@ var Neo4j = function () {
                     while (1) {
                         switch (_context3.prev = _context3.next) {
                             case 0:
-                                console.log("0. source: " + source + " => " + " target: " + target);
                                 promise = this.session.run("MATCH (n:Host) WHERE ID(n) = $source MATCH (m:Host) WHERE ID(m) = $target CREATE (n)-[c:CONNECTION]->(m)", { source: neo4j.int(source), target: neo4j.int(target) });
-                                return _context3.abrupt("return", promise.then(function (result) {
-                                    console.log("1. source: " + source + " => " + " target: " + target);
-                                }));
+                                return _context3.abrupt("return", promise);
 
-                            case 3:
+                            case 2:
                             case "end":
                                 return _context3.stop();
                         }
@@ -126,15 +122,11 @@ var Neo4j = function () {
                                 promise = this.session.run("MATCH p = (n:Host {ip: $addr})-[c:CONNECTION*1.." + depth + "]-(m) RETURN p", { addr: addr });
 
                                 this.data = data;
-                                console.log("1. Here");
                                 return _context4.abrupt("return", promise.then(function (result) {
-                                    console.log("2. Here");
                                     return this.processResult(result, this.data.nodes, this.data.edges);
-                                }.bind(this), function (reason) {
-                                    console.log(reason);
-                                }));
+                                }.bind(this), function (reason) {}));
 
-                            case 4:
+                            case 3:
                             case "end":
                                 return _context4.stop();
                         }
@@ -398,107 +390,102 @@ var Neo4j = function () {
                                 return _context6.finish(76);
 
                             case 84:
-                                console.log("4. Here");
                                 nodes.clear();
-                                console.log("4.1. Here");
                                 edges.clear();
-                                console.log("4.2. Here");
                                 _iteratorNormalCompletion5 = true;
                                 _didIteratorError5 = false;
                                 _iteratorError5 = undefined;
-                                _context6.prev = 92;
+                                _context6.prev = 89;
                                 for (_iterator5 = nodesNew.entries()[Symbol.iterator](); !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
                                     _step5$value = _slicedToArray(_step5.value, 2), key = _step5$value[0], value = _step5$value[1];
 
                                     nodes.set(key, value);
                                 }
-                                _context6.next = 100;
+                                _context6.next = 97;
                                 break;
 
-                            case 96:
-                                _context6.prev = 96;
-                                _context6.t4 = _context6["catch"](92);
+                            case 93:
+                                _context6.prev = 93;
+                                _context6.t4 = _context6["catch"](89);
                                 _didIteratorError5 = true;
                                 _iteratorError5 = _context6.t4;
 
-                            case 100:
-                                _context6.prev = 100;
-                                _context6.prev = 101;
+                            case 97:
+                                _context6.prev = 97;
+                                _context6.prev = 98;
 
                                 if (!_iteratorNormalCompletion5 && _iterator5.return) {
                                     _iterator5.return();
                                 }
 
-                            case 103:
-                                _context6.prev = 103;
+                            case 100:
+                                _context6.prev = 100;
 
                                 if (!_didIteratorError5) {
-                                    _context6.next = 106;
+                                    _context6.next = 103;
                                     break;
                                 }
 
                                 throw _iteratorError5;
 
-                            case 106:
-                                return _context6.finish(103);
-
-                            case 107:
+                            case 103:
                                 return _context6.finish(100);
 
-                            case 108:
-                                console.log("4.3. Here");
+                            case 104:
+                                return _context6.finish(97);
+
+                            case 105:
                                 _iteratorNormalCompletion6 = true;
                                 _didIteratorError6 = false;
                                 _iteratorError6 = undefined;
-                                _context6.prev = 112;
+                                _context6.prev = 108;
                                 for (_iterator6 = edgesNew.entries()[Symbol.iterator](); !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
                                     _step6$value = _slicedToArray(_step6.value, 2), key = _step6$value[0], value = _step6$value[1];
 
                                     edges.set(key, value);
                                 }
-                                _context6.next = 120;
+                                _context6.next = 116;
                                 break;
 
-                            case 116:
-                                _context6.prev = 116;
-                                _context6.t5 = _context6["catch"](112);
+                            case 112:
+                                _context6.prev = 112;
+                                _context6.t5 = _context6["catch"](108);
                                 _didIteratorError6 = true;
                                 _iteratorError6 = _context6.t5;
 
-                            case 120:
-                                _context6.prev = 120;
-                                _context6.prev = 121;
+                            case 116:
+                                _context6.prev = 116;
+                                _context6.prev = 117;
 
                                 if (!_iteratorNormalCompletion6 && _iterator6.return) {
                                     _iterator6.return();
                                 }
 
-                            case 123:
-                                _context6.prev = 123;
+                            case 119:
+                                _context6.prev = 119;
 
                                 if (!_didIteratorError6) {
-                                    _context6.next = 126;
+                                    _context6.next = 122;
                                     break;
                                 }
 
                                 throw _iteratorError6;
 
-                            case 126:
-                                return _context6.finish(123);
+                            case 122:
+                                return _context6.finish(119);
 
-                            case 127:
-                                return _context6.finish(120);
+                            case 123:
+                                return _context6.finish(116);
 
-                            case 128:
-                                console.log("5. Here nAdd: " + nodesAdd.length + ", nDel: " + nodesDel.length + ", eAdd: " + edgesAdd.length + ", eDel: ", edgesDel.length);
+                            case 124:
                                 return _context6.abrupt("return", { nodesAdd: nodesAdd, nodesDel: nodesDel, edgesAdd: edgesAdd, edgesDel: edgesDel });
 
-                            case 130:
+                            case 125:
                             case "end":
                                 return _context6.stop();
                         }
                     }
-                }, _callee6, this, [[11, 15, 19, 27], [20,, 22, 26], [30, 34, 38, 46], [39,, 41, 45], [49, 53, 57, 65], [58,, 60, 64], [68, 72, 76, 84], [77,, 79, 83], [92, 96, 100, 108], [101,, 103, 107], [112, 116, 120, 128], [121,, 123, 127]]);
+                }, _callee6, this, [[11, 15, 19, 27], [20,, 22, 26], [30, 34, 38, 46], [39,, 41, 45], [49, 53, 57, 65], [58,, 60, 64], [68, 72, 76, 84], [77,, 79, 83], [89, 93, 97, 105], [98,, 100, 104], [108, 112, 116, 124], [117,, 119, 123]]);
             }));
 
             function processResult(_x12, _x13, _x14, _x15) {
