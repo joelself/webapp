@@ -7,14 +7,6 @@ www.get('/',
         console.log(ctx);
         await ctx.render('index');
     }
-//   async (ctx, next) => {
-//     const { addr, depth } = ctx.params;
-//     const data = await ctx
-//       .state
-//       .neo4j.getByIp(addr, depth);
-
-//     ctx.body = data;
-//   }
 );
 
 

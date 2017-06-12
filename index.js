@@ -8,8 +8,8 @@ const src = env === 'production' ? './build/app' : './src/app';
 
 require('babel-polyfill');
 if (env === 'development') {
-  // for development use babel/register for faster runtime compilation
-  require('babel-register');
+    // for development use babel/register for faster runtime compilation
+    require('babel-register');
 }
 
 const apps = require(src).default;

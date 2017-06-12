@@ -13,7 +13,7 @@ line {
 </style>
 </head>
 <body>
-<input type="text" id="input" value="10.0.0.2"></input><button type="button" onclick="doQuery()" >Find</button>
+Query: <input type="text" id="input" value="1.0.0.25" />Depth: <input id="depth" type="number" value=2 /><button type="button" onclick="doQueryIp()" >Find IP</button><button type="button" onclick="doQueryHostname()" >Find Hostname</button>
 <p id="display"><svg width="600" height="600"></svg></p>
 <p id="dbgarea">
 </p>
@@ -46,19 +46,22 @@ var nodes = new Map();
 var edges = new Map();
 var lastUpdate = 0;
 var ws;
-function doQuery() {
+function doQueryIp() {
 	var ip = document.getElementById("input").value;
-	displayGraph('ws://127.0.0.1:9000/ip/' + ip + '/2');
-    //ws.onmessage = function(evt) {
-    //    document.getElementById("display").text = "Msg received from foo: " + evt.data;
-    //}
+    var depth = document.getElementById("depth").value;
+	displayGraph("ws://localhost:9000/ip/" + ip + "/" + depth);
+    
+}
+function doQueryHostname() {
+	var hostname = document.getElementById("input").value;
+    var depth = document.getElementById("depth").value;
+	displayGraph("ws://localhost:9000/hostname/" + hostname + "/" + depth);
     
 }
 var init = false;
 function displayGraph(url) {
     ws = new WebSocket(url);
-    ws.addEventListener('open', function (event) {
-        //ws.send('Hello Server!');
+    ws.addEventListener("open", function (event) {
         console.log("Sent message");
     });
     ws.onmessage = function(evt) {

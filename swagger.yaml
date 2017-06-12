@@ -1,0 +1,132 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is a demo application for viewing hosts and their connections to other
+    hosts
+  version: 1.0.0
+  title: Demo app
+  contact:
+    email: self@jself.io
+  license:
+    name: MIT
+    url: 'https://joelself.mit-license.org/'
+host: 'localhost:4000'
+basePath: /v2
+tags:
+  - name: ip
+    description: Get hosts connected to an IP address up to depth
+  - name: hostname
+    description: Get hosts connected to a hostname up to depth
+schemes:
+  - ws
+paths:
+  '/ip/{addr}/{depth}':
+    get:
+      tags:
+        - ip
+      summary: Get hosts connected to an IP address up to depth
+      description: >-
+        Returns all hosts connected to the IP address specified up to the depth
+        specified
+      operationId: getHostsByIP
+      produces:
+        - application/json
+      parameters:
+        - name: addr
+          in: path
+          description: IP address of host to look up
+          required: true
+          type: string
+          format: string
+        - name: depth
+          in: path
+          description: Depth of connected hosts to return
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/NodesAndEdges'
+        '400':
+          description: Invalid IP address
+        '404':
+          description: IP address not found
+  '/hostname/{name}/{depth}':
+    get:
+      tags:
+        - hostname
+      summary: Get hosts connected to a hostname up to depth
+      description: >-
+        Returns all hosts connected to the hostname specified up to the depth
+        specified
+      operationId: getHostsByHostname
+      produces:
+        - application/json
+      parameters:
+        - name: name
+          in: path
+          description: Hostname of host to look up
+          required: true
+          type: string
+          format: string
+        - name: depth
+          in: path
+          description: Depth of connected hosts to return
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/NodesAndEdges'
+        '400':
+          description: Invalid hostname
+        '404':
+          description: Hostname not found
+definitions:
+  Host:
+    type: object
+    properties:
+      hostname:
+        type: string
+        format: string
+      ip:
+        type: string
+        format: string
+      id:
+        type: integer
+        format: int64
+  Edge:
+    type: object
+    properties:
+      source:
+        type: integer
+        format: int64
+      target:
+        type: integer
+        format: int64
+  NodesAndEdges:
+    type: object
+    properties:
+      nodesAdd:
+        type: array
+        items:
+          $ref: '#/definitions/Host'
+      nodesDel:
+        type: array
+        items:
+          $ref: '#/definitions/Host'
+      edgesAdd:
+        type: array
+        items:
+          $ref: '#/definitions/Edge'
+      edgesDel:
+        type: array
+        items:
+          $ref: '#/definitions/Edge'
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'

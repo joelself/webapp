@@ -4,13 +4,15 @@ const user = "neo4j";
 const password = "password";
 class Neo4j {
    
-   constructor() {
+   constructor(clear) {
         this.driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
         this.session = this.driver.session();
 
-        var resultPromise = this.session.run(
-            'MATCH (n) DETACH DELETE n'
-        );
+        if(clear) {
+            var resultPromise = this.session.run(
+                'MATCH (n) DETACH DELETE n'
+            );
+        }
    }
 
     async addNode(hostname, ip) {
@@ -62,7 +64,7 @@ class Neo4j {
     
     async getByHostname(data, name, depth) {
         var promise = this.session.run(
-            "MATCH p = (n:Host {hostname: $name})-[c:CONNECTION*1.." + depth + "}]-(m) RETURN p",
+            "MATCH p = (n:Host {hostname: $name})-[c:CONNECTION*1.." + depth + "]-(m) RETURN p",
             {name: name}
         );
         this.data = data;

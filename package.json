@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "babel-polyfill": "^6.23.0",
+    "chai-as-promised": "^7.0.0",
     "kcors": "^2.2.1",
     "koa": "^2.0.0-alpha.8",
     "koa-bodyparser": "^3.2.0",
@@ -30,7 +31,9 @@
     "koa-websocket": "^4.0.0",
     "neo4j-driver": "^1.2.0",
     "promise-redis": "0.0.5",
+    "proxyquire": "^1.8.0",
     "redis": "^2.7.1",
+    "swagger2-koa": "0.0.36",
     "ws": "^3.0.0"
   },
   "devDependencies": {
