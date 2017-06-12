@@ -1,8 +1,7 @@
 var proxyquire =  require("proxyquire")
   , assert     =  require("assert")
   , neo4jdriverStub = {};
-  
-//import assert from "assert";
+
 import chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 
@@ -19,7 +18,6 @@ describe("neo4j", function() {
         var Neo4j = require("../src/neo4j").default;
         var promises = [];
         var db = new Neo4j(true);
-        console.log("foo");
         promises.push(db.addNode("abc.com", "192.0.0.1").then(storeNode));
         promises.push(db.addNode("xyz.com", "192.0.0.2").then(storeNode));
         promises.push(db.addNode("123.com", "192.0.0.3").then(storeNode));
@@ -126,7 +124,6 @@ describe("neo4j", function() {
 });
 
 function storeNode(result) {
-    console.log(result);
     nodes.push(result);
 }
 
@@ -140,8 +137,6 @@ class neo4jdriver {
         return this;
     }
     run(q, p) {
-        console.log(q);
-        console.log(p);
         query = q;
         params = p;
         return Promise.resolve(0);

@@ -23,7 +23,6 @@ class Neo4j {
         return promise.then(result => {
             const singleRecord = result.records[0];
             const node = singleRecord.get(0);
-            console.log("hostname: " + node.hostname + ", ip: " + node.ip + ", id: " + node.id.low);
 
             return {hostname: node.hostname, ip: node.ip, id: node.id.low};
         });
@@ -37,14 +36,11 @@ class Neo4j {
     }
 
     async addEdge(source, target) {
-        console.log("0. source: " + source + " => " + " target: " + target);
         var promise = this.session.run(
             "MATCH (n:Host) WHERE ID(n) = $source MATCH (m:Host) WHERE ID(m) = $target CREATE (n)-[c:CONNECTION]->(m)",
             {source: neo4j.int(source), target: neo4j.int(target)}
         );
-        return promise.then(result => {
-            console.log("1. source: " + source + " => " + " target: " + target);
-        });
+        return promise;
     }
 
     async getByIp(data, addr, depth) {
@@ -53,12 +49,9 @@ class Neo4j {
             {addr: addr}
         );
         this.data = data;
-        console.log("1. Here");
         return promise.then(function(result) {
-            console.log("2. Here");
             return this.processResult(result, this.data.nodes, this.data.edges);
         }.bind(this), function(reason) {
-            console.log(reason);
         });
     }
     
@@ -123,19 +116,14 @@ class Neo4j {
                 edgesDel.push(value);
             }
         }
-        console.log("4. Here");
         nodes.clear();
-        console.log("4.1. Here");
         edges.clear();
-        console.log("4.2. Here");
         for (var [key, value] of nodesNew.entries()) {
             nodes.set(key, value);
         }
-        console.log("4.3. Here");
         for (var [key, value] of edgesNew.entries()) {
             edges.set(key,value);
         }
-        console.log("5. Here nAdd: " + nodesAdd.length + ", nDel: " + nodesDel.length + ", eAdd: " + edgesAdd.length + ", eDel: ", edgesDel.length);
         return {nodesAdd: nodesAdd, nodesDel: nodesDel, edgesAdd: edgesAdd, edgesDel: edgesDel};
     }
 }
